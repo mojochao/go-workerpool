@@ -35,12 +35,12 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := New(tt.args.size, tt.args.worker)
-			if got == nil {
+			wp := New(tt.args.size, tt.args.worker)
+			if wp == nil {
 				t.Error("New() = nil, want not nil")
 			}
-			if got.Size != size {
-				t.Errorf("New() Size = %d, want %d", got.Size, size)
+			if wp.Size != size {
+				t.Errorf("New() Size = %d, want %d", wp.Size, size)
 			}
 		})
 	}
@@ -63,8 +63,8 @@ func TestPool_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := New(5, double)
-			gotResults := p.Run(tt.args.jobs)
+			wp := New(5, double)
+			gotResults := wp.Run(tt.args.jobs)
 			sort.Ints(gotResults)
 			if !reflect.DeepEqual(gotResults, tt.wantResults) {
 				t.Errorf("Run() = %v, want %v", gotResults, tt.wantResults)

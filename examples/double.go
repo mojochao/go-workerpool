@@ -11,11 +11,11 @@ import (
 // of int inputs, and results, here a channel of int outputs. where each
 // output value is double that of each input value.
 func worker(id int, jobs <-chan int, results chan<- int) {
-	for j := range jobs {
-		fmt.Println("worker", id, "started  job", j)
+	for job := range jobs {
+		fmt.Println("worker", id, "started  job", job)
 		time.Sleep(time.Second) // doubling ints is hard work
-		fmt.Println("worker", id, "finished job", j)
-		results <- j * 2
+		fmt.Println("worker", id, "finished job", job)
+		results <- job * 2
 	}
 }
 

@@ -28,15 +28,15 @@ func New[J any, R any](size int, worker func(id int, jobs <-chan J, results chan
 
 // Run processes jobs in workers processing inputs of type J and returning
 // outputs of type R.
-func (p *WorkerPool[J, R]) Run(jobs []J) (results []R) {
+func (wp *WorkerPool[J, R]) Run(jobs []J) (results []R) {
 	for _, job := range jobs {
-		p.jobs <- job
+		wp.jobs <- job
 	}
-	close(p.jobs)
+	close(wp.jobs)
 
 	num := len(jobs)
 	for i := 0; i < num; i++ {
-		results = append(results, <-p.results)
+		results = append(results, <-wp.results)
 	}
 	return results
 }
