@@ -7,17 +7,26 @@ import (
 	"github.com/mojochao/go-workerpool/pkg/workerpool"
 )
 
-func main() {
-	double := func(id int, jobs <-chan int, results chan<- int) {
-		for j := range jobs {
-			fmt.Println("worker", id, "started  job", j)
-			time.Sleep(time.Second)
-			fmt.Println("worker", id, "finished job", j)
-			results <- j * 2
-		}
+// worker is a workerpool worker function processing jobs, here a channel
+// of int inputs, and results, here a channel of int outputs. where each
+// output value is double that of each input value.
+func worker(id int, jobs <-chan int, results chan<- int) {
+	for j := range jobs {
+		fmt.Println("worker", id, "started  job", j)
+		time.Sleep(time.Second) // doubling ints is hard work
+		fmt.Println("worker", id, "finished job", j)
+		results <- j * 2
 	}
+}
 
-	p := workerpool.New(5, double)
-	results := p.Run([]int{1, 2, 3, 4, 5})
+func main() {
+	// Create a workerpool configured with the number of workers to pool.
+	wp := workerpool.New(5, worker)
+
+	// Define jobs, here a slice of ints to be doubled.
+	jobs := []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+	// Run the jobs in the workerpool workers and print the doubled results.
+	results := wp.Run(jobs)
 	fmt.Println(results)
 }
