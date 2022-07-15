@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/mojochao/go-workerpool/pkg/workerpool"
@@ -10,11 +11,9 @@ import (
 // worker is a workerpool worker function processing jobs, here a channel
 // of int inputs, and results, here a channel of int outputs. where each
 // output value is double that of each input value.
-func worker(id int, jobs <-chan int, results chan<- int) {
+func worker(jobs <-chan int, results chan<- int) {
 	for job := range jobs {
-		fmt.Println("worker", id, "started  job", job)
 		time.Sleep(time.Second) // doubling ints is hard work
-		fmt.Println("worker", id, "finished job", job)
 		results <- job * 2
 	}
 }
@@ -28,5 +27,7 @@ func main() {
 
 	// Run the jobs in the workerpool workers and print the doubled results.
 	results := wp.Run(jobs)
+	fmt.Println(results)
+	sort.Ints(results)
 	fmt.Println(results)
 }

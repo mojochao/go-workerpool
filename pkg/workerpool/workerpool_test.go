@@ -9,7 +9,7 @@ import (
 
 const size = 5
 
-func double(id int, jobs <-chan int, results chan<- int) {
+func doubleWorker(jobs <-chan int, results chan<- int) {
 	for j := range jobs {
 		time.Sleep(time.Second)
 		results <- j * 2
@@ -19,17 +19,17 @@ func double(id int, jobs <-chan int, results chan<- int) {
 func TestNew(t *testing.T) {
 	type args[J any, R any] struct {
 		size   int
-		worker func(id int, jobs <-chan int, results chan<- int)
+		worker func(jobs <-chan int, results chan<- int)
 	}
 	tests := []struct {
 		name string
-		args args[int, func(id int, jobs <-chan int, results chan<- int)]
+		args args[int, func(jobs <-chan int, results chan<- int)]
 	}{
 		{
 			name: "test construction",
-			args: args[int, func(id int, jobs <-chan int, results chan<- int)]{
+			args: args[int, func(jobs <-chan int, results chan<- int)]{
 				size:   5,
-				worker: double,
+				worker: doubleWorker,
 			},
 		},
 	}
@@ -46,7 +46,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestPool_Run(t *testing.T) {
+func TestPool_RunSmallerSizeThanNumJobs(t *testing.T) {
 	type args struct {
 		jobs []int
 	}
@@ -63,7 +63,34 @@ func TestPool_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			wp := New(5, double)
+			wp := New(2, doubleWorker)
+			gotResults := wp.Run(tt.args.jobs)
+			sort.Ints(gotResults)
+			if !reflect.DeepEqual(gotResults, tt.wantResults) {
+				t.Errorf("Run() = %v, want %v", gotResults, tt.wantResults)
+			}
+		})
+	}
+}
+
+func TestPool_RunLargerSizeThanNumJobs(t *testing.T) {
+	type args struct {
+		jobs []int
+	}
+	tests := []struct {
+		name        string
+		args        args
+		wantResults []int
+	}{
+		{
+			name:        "test double integers",
+			args:        args{jobs: []int{1, 2, 3, 4, 5}},
+			wantResults: []int{2, 4, 6, 8, 10},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			wp := New(10, doubleWorker)
 			gotResults := wp.Run(tt.args.jobs)
 			sort.Ints(gotResults)
 			if !reflect.DeepEqual(gotResults, tt.wantResults) {

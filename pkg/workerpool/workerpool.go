@@ -13,11 +13,11 @@ type WorkerPool[J any, R any] struct {
 
 // New returns a new WorkerPool for workers processing inputs of type J and returning
 // outputs of type R.
-func New[J any, R any](size int, worker func(id int, jobs <-chan J, results chan<- R)) *WorkerPool[J, R] {
+func New[J any, R any](size int, worker func(jobs <-chan J, results chan<- R)) *WorkerPool[J, R] {
 	jobs := make(chan J, size)
 	results := make(chan R, size)
 	for i := 0; i < size; i++ {
-		go worker(i, jobs, results)
+		go worker(jobs, results)
 	}
 	return &WorkerPool[J, R]{
 		Size:    size,
